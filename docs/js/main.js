@@ -2,7 +2,8 @@
 class Captain extends HTMLElement {
     constructor(pirateShip) {
         super();
-        pirateShip.appendChild(this);
+        this.ship = pirateShip;
+        this.ship.appendChild(this);
     }
 }
 window.customElements.define("captain-component", Captain);
@@ -22,8 +23,19 @@ class GameObject extends HTMLElement {
 class Horn extends GameObject {
     constructor() {
         super();
+        this.observers = [];
         this._position = new Vector(window.innerWidth / 2 - this.clientWidth / 2, window.innerHeight / 2 - this.clientHeight / 2);
         this.draw();
+    }
+    subscribe(observer) {
+        this.observers.push(observer);
+    }
+    unsubscribe(observer) {
+    }
+    notifyObservers() {
+        for (const observer of this.observers) {
+            observer.notify();
+        }
     }
 }
 window.customElements.define("horn-component", Horn);
@@ -31,10 +43,20 @@ class Main {
     constructor() {
         this.ships = [];
         let horn = new Horn();
-        for (let i = 0; i < 10; i++) {
-            this.ships.push(new PirateShip());
-        }
         let messageboard = new MessageBoard();
+        for (let i = 0; i < 10; i++) {
+            this.ships.push(new PirateShip(horn));
+        }
+        for (const ship of this.ships) {
+            ship.addEventListener("click", () => {
+                horn.subscribe(ship);
+                ship.alert();
+            });
+        }
+        horn.addEventListener("click", () => {
+            messageboard.addMessage("Je hebt op de horn geklikt.");
+            horn.notifyObservers();
+        });
     }
 }
 window.addEventListener("load", () => new Main());
@@ -43,6 +65,7 @@ class MessageBoard extends GameObject {
         super();
     }
     addMessage(text) {
+        console.log("Er zou nu een message toegevoegd moeten worden.");
         let message = document.createElement("message");
         message.innerHTML = text;
         this.appendChild(message);
@@ -52,7 +75,7 @@ window.customElements.define("messageboard-component", MessageBoard);
 class Ship extends GameObject {
     constructor() {
         super();
-        this.activeImage = "";
+        this._activeImage = "";
         this.colors = ["Green", "Blue", "Orange", "White", "Black", "Red"];
         this._color = "";
         this.rotation = Math.random() * 360;
@@ -60,21 +83,29 @@ class Ship extends GameObject {
         this.createShip();
     }
     get color() { return this._color; }
+    get activeImage() { return this._activeImage; }
     createShip() {
         Ship.numberOfShips++;
         if (Ship.numberOfShips > 6)
             Ship.numberOfShips = 1;
-        this.activeImage = `url(images/ship${Ship.numberOfShips + 3}.png)`;
+        this._activeImage = `url(images/ship${Ship.numberOfShips + 3}.png)`;
         this.style.backgroundImage = "url(images/ship-unregistered.png)";
         this._color = this.colors[Ship.numberOfShips - 1];
     }
 }
 Ship.numberOfShips = 0;
 class PirateShip extends Ship {
-    constructor() {
+    constructor(subject) {
         super();
         this.captain = new Captain(this);
+        this.subject = subject;
         this.draw();
+    }
+    alert() {
+        this.style.backgroundImage = this.activeImage;
+    }
+    notify() {
+        this.captain.style.backgroundImage = "url(images/emote_alert.png)";
     }
 }
 window.customElements.define("ship-component", PirateShip);

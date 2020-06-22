@@ -1,9 +1,11 @@
-class Captain extends HTMLElement{
-    
+class Captain extends HTMLElement {
+    private ship:PirateShip
+
     constructor(pirateShip : PirateShip) {
         super()
 
-        pirateShip.appendChild(this)
+        this.ship = pirateShip
+        this.ship.appendChild(this)
     }
 }
 
