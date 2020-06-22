@@ -3,18 +3,17 @@ class Main {
 
     constructor() {
         // Subject
-        let horn : Horn = new Horn()
+        let horn = Horn.getInstance()
         let messageboard : MessageBoard = new MessageBoard()
 
         for (let i = 0; i < 10; i++) {
             // Observers
-            this.ships.push(new PirateShip(horn))
+            this.ships.push(new PirateShip())
         }
 
         for(const ship of this.ships) {
             ship.addEventListener("click", () => {
-                horn.subscribe(ship)
-                ship.alert()
+                ship.changeSubscription(ship)
             })
         }
 

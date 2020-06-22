@@ -2,8 +2,9 @@
 
 class Horn extends GameObject implements Subject {
     private observers:Observer[] = []
+    private static instance:Horn
     
-    constructor() {
+    private constructor() {
         super()
 
         this._position = new Vector(window.innerWidth / 2 - this.clientWidth / 2, window.innerHeight / 2 - this.clientHeight / 2)
@@ -16,7 +17,8 @@ class Horn extends GameObject implements Subject {
     }
 
     unsubscribe(observer: Observer): void {
-        //this.observers.splice(0, 1, observer)
+        let index = this.observers.indexOf(observer)
+        this.observers.splice(index, 1)
     }
 
     notifyObservers(): void {
@@ -24,6 +26,13 @@ class Horn extends GameObject implements Subject {
             observer.notify()
         }
     }
+
+    public static getInstance() {
+        if(!this.instance) {
+            this.instance = new Horn()
+        }
+        return this.instance
+    }
 }
 
-window.customElements.define("horn-component", Horn)
+window.customElements.define("horn-component", Horn as any)

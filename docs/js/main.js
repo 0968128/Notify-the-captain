@@ -31,26 +31,33 @@ class Horn extends GameObject {
         this.observers.push(observer);
     }
     unsubscribe(observer) {
+        let index = this.observers.indexOf(observer);
+        this.observers.splice(index, 1);
     }
     notifyObservers() {
         for (const observer of this.observers) {
             observer.notify();
         }
     }
+    static getInstance() {
+        if (!this.instance) {
+            this.instance = new Horn();
+        }
+        return this.instance;
+    }
 }
 window.customElements.define("horn-component", Horn);
 class Main {
     constructor() {
         this.ships = [];
-        let horn = new Horn();
+        let horn = Horn.getInstance();
         let messageboard = new MessageBoard();
         for (let i = 0; i < 10; i++) {
-            this.ships.push(new PirateShip(horn));
+            this.ships.push(new PirateShip());
         }
         for (const ship of this.ships) {
             ship.addEventListener("click", () => {
-                horn.subscribe(ship);
-                ship.alert();
+                ship.changeSubscription(ship);
             });
         }
         horn.addEventListener("click", () => {
@@ -95,17 +102,28 @@ class Ship extends GameObject {
 }
 Ship.numberOfShips = 0;
 class PirateShip extends Ship {
-    constructor(subject) {
+    constructor() {
         super();
+        this._subscribed = false;
         this.captain = new Captain(this);
-        this.subject = subject;
         this.draw();
     }
-    alert() {
-        this.style.backgroundImage = this.activeImage;
-    }
+    get subscribed() { return this._subscribed; }
+    set subscribed(value) { this._subscribed = value; }
     notify() {
         this.captain.style.backgroundImage = "url(images/emote_alert.png)";
+    }
+    changeSubscription(ship) {
+        if (ship.subscribed) {
+            ship.subscribed = !ship.subscribed;
+            Horn.getInstance().unsubscribe(ship);
+            ship.style.backgroundImage = "url(images/ship-unregistered.png)";
+        }
+        else if (!ship.subscribed) {
+            ship.subscribed = !ship.subscribed;
+            Horn.getInstance().subscribe(ship);
+            ship.style.backgroundImage = ship.activeImage;
+        }
     }
 }
 window.customElements.define("ship-component", PirateShip);
