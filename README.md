@@ -14,4 +14,10 @@ Toevoegen van het Observer Pattern om de kapitein wakker te maken en een bericht
 
 ## Opdracht
 - Teken het klassendiagram en pas het *Observer Pattern* toe.
-- Maak de code af volgens boven beschreven regels. 
+- Maak de code af volgens boven beschreven regels.
+
+## Lucas' notes
+- Observer pattern toegepast: er wordt een notificatie verstuurd naar de kapiteins van alle schepen die zich aangemeld hebben. Hierbij wordt
+gebruik gemaakt van een observer- en een subjectinterface. De horn is het subject en de schepen zijn observers. Het aanmelden kun je zelf
+doen door erop te klikken (een schip is by default niet aangemeld). De horn is tevens een singleton, omdat er maar één van mag zijn en die
+wil ik graag direct kunnen aanspreken vanuit de PirateShip class om me voor de notificatie van de horn te kunnen aan- of afmelden.
